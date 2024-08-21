@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #ececec;
+            font-family: 'Quicksand', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        h2 {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.8s ease-in-out;
+        }
+
+        .card-header {
+            background-color: #2e6eae;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 500;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .card-header button {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .card-body {
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        input.form-control {
+            border-radius: 10px;
+            border: 1px solid #ced4da;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: #2980b9;
+            border-color: #2980b9;
+            font-size: 14px;
+            border-radius: 20px;
+        }
+
+        .gpa-cgpa-result {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .calculate-btn {
+            background-color: #2980b9;
+            color: white;
+            font-size: 18px;
+            border-radius: 30px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Hover Effects */
+        .card:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            color: #ffffff;
+        }
+
+        .calculate-btn:hover {
+            background-color: #1a73e8;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>CGPA Calculator</h2>
+        <div class="accordion" id="semesterAccordion">
+
+            <!-- Loop for 8 semesters -->
+            <script>
+                for (let sem = 1; sem <= 8; sem++) {
+                    document.write(`
+                        <div class="card">
+                            <div class="card-header" id="heading${sem}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse${sem}" aria-expanded="${sem === 1 ? 'true' : 'false'}" aria-controls="collapse${sem}">
+                                        Semester ${sem}
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse${sem}" class="collapse ${sem === 1 ? 'show' : ''}" aria-labelledby="heading${sem}" data-parent="#semesterAccordion">
+                                <div class="card-body">
+                                    <div id="semester${sem}Subjects" class="mb-3"></div>
+                                    <button class="btn btn-sm btn-primary mb-2" onclick="addSubject(${sem})">Add Subject</button>
+                                    <p class="gpa-cgpa-result">GPA: <span id="semester${sem}GPA">0.00</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                }
+            </script>
+
+        </div>
+        <hr>
+        <p class="gpa-cgpa-result">Overall CGPA: <span id="overallCGPA">0.00</span></p>
+        <button class="btn calculate-btn btn-block" onclick="calculateCGPA()">Calculate CGPA</button>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Define grade points for each grade
+        const gradePointsMap = {
+            'O': 10,
+            'A+': 9,
+            'A': 8,
+            'B+': 7,
+            'B': 6,
+            'C+': 5,
+            'C': 4,
+            'D+': 3,
+            'D': 2,
+            'F': 0
+        };
+
+        // Function to add a subject input row
+        function addSubject(semester) {
+            const subjectContainer = document.getElementById(`semester${semester}Subjects`);
+            if (subjectContainer.children.length >= 15) {
+                alert("You can add a maximum of 15 subjects per semester.");
+                return;
+            }
+
+            const subjectDiv = document.createElement("div");
+            subjectDiv.classList.add("form-row", "mb-2");
+            subjectDiv.innerHTML = `
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Subject Name" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control" placeholder="Credit Points" min="1" max="5" step="0.01" required>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" required>
+                        <option value="" disabled selected>Select Grade</option>
+                        ${Object.keys(gradePointsMap).map(grade => `<option value="${grade}">${grade}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control" placeholder="Grade Points (10, 9, etc.)" step="0.01" min="0" max="10" required>
+                </div>
+            `;
+            subjectContainer.appendChild(subjectDiv);
+        }
+
+        // Function to calculate GPA and CGPA
+        function calculateCGPA() {
+            let totalCGPA = 0;
+            let totalCredits = 0;
+
+            for (let sem = 1; sem <= 8; sem++) {
+                const subjectContainer = document.getElementById(`semester${sem}Subjects`);
+                const subjectRows = subjectContainer.querySelectorAll(".form-row");
+
+                let semesterTotalPoints = 0;
+                let semesterTotalCredits = 0;
+
+                subjectRows.forEach(row => {
+                    const inputs = row.querySelectorAll("input");
+                    const creditPoints = parseFloat(inputs[1].value);
+                    const grade = row.querySelector("select").value;
+                    const gradePoints = gradePointsMap[grade] || 0;
+
+                    if (!isNaN(creditPoints) && !isNaN(gradePoints)) {
+                        semesterTotalPoints += creditPoints * gradePoints;
+                        semesterTotalCredits += creditPoints;
+                    }
+                });
+
+                const semesterGPA = semesterTotalCredits ? (semesterTotalPoints / semesterTotalCredits).toFixed(2) : "0.00";
+                document.getElementById(`semester${sem}GPA`).innerText = semesterGPA;
+
+                totalCGPA += semesterTotalPoints;
+                totalCredits += semesterTotalCredits;
+            }
+
+            const overallCGPA = totalCredits ? (totalCGPA / totalCredits).toFixed(2) : "0.00";
+            document.getElementById("overallCGPA").innerText = overallCGPA;
+        }
+    </script>
+</body>
+
+</html>
